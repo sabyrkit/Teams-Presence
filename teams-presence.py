@@ -1,7 +1,8 @@
 ##!/usr/bin/env python
 # Python script to show Teams presence status on led
 # Author: Maximilian Krause
-# Date 29.05.2021
+# Modified by: Scott Byrkit
+# Date 2022-02-18
 
 # Define Error Logging
 def printerror(ex):
@@ -92,8 +93,8 @@ SCOPES = [
     'User.Read',
     'Presence.Read'
 ]
-workday_start = time(8)
-workday_end = time(19)
+workday_start = time(7)
+workday_end = time(17)
 workdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 width = 0
 height = 0
@@ -137,8 +138,8 @@ if args.brightness:
 	if args.brightness < 0.1 and args.brightness > 1:
 		printerror("Value must be between 0.1 and 1")
 		exit(5)
-	brightness = args.brightness
-	printwarning("Option: Brightness set to " + str(brightness))
+	brightness_led = args.brightness
+	printwarning("Option: Brightness set to " + str(brightness_led))
 
 if args.weekend:
 	printwarning("Option: Set weekend checks to true")
@@ -289,6 +290,14 @@ def switchYellow() :
 	red = 255
 	green = 255
 	blue = 0
+	blinkThread = threading.Thread(target=setColor, args=(red, green, blue, '', ''))
+	blinkThread.do_run = True
+	blinkThread.start()
+
+def switchPurple() :
+	red = 255
+	green = 0
+	blue = 255
 	blinkThread = threading.Thread(target=setColor, args=(red, green, blue, '', ''))
 	blinkThread.do_run = True
 	blinkThread.start()
@@ -605,7 +614,7 @@ if __name__ == '__main__':
 		print("Current CPU:\t\t" + str(cpu_r) + "°C")
 
 		if args.brightness:
-			printwarning("Option:\t\t\t" + "Set brightness to " + str(brightness))
+			printwarning("Option:\t\t\t" + "Set brightness to " + str(brightness_led))
 
 		if args.refresh:
 			printwarning("Option:\t\t\t" +  "Set refresh to " + str(sleepValue))
@@ -630,44 +639,43 @@ if __name__ == '__main__':
 			print("Teams presence:\t\t" + '\033[31m' + "In a call" + '\033[0m')
 			switchRed()
 		elif jsonresult['activity'] == "Away":
-                        print("Teams presence:\t\t" + '\033[33m' + "Away" + '\033[0m')
-                        switchYellow()
+            		print("Teams presence:\t\t" + '\033[33m' + "Away" + '\033[0m')
+            		switchYellow()
 		elif jsonresult['activity'] == "BeRightBack":
-                        print("Teams presence:\t\t" + '\033[33m' + "Be Right Back" + '\033[0m')
-                        switchYellow()
+            		print("Teams presence:\t\t" + '\033[33m' + "Be Right Back" + '\033[0m')
+            		switchYellow()
 		elif jsonresult['activity'] == "Busy":
-                        print("Teams presence:\t\t" + '\033[31m' + "Busy" + '\033[0m')
-                        switchRed()
+        		print("Teams presence:\t\t" + '\033[31m' + "Busy" + '\033[0m')
+        		switchRed()
 		elif jsonresult['activity'] == "InAConferenceCall":
-                        print("Teams presence:\t\t" + '\033[31m' + "In a conference call" + '\033[0m')
-                        switchRed()
+        		print("Teams presence:\t\t" + '\033[31m' + "In a conference call" + '\033[0m')
+        		switchBlue()
 		elif jsonresult['activity'] == "DoNotDisturb":
-                        print("Teams presence:\t\t" + '\033[31m' + "Do Not Disturb" + '\033[0m')
-                        switchRed()
+        		print("Teams presence:\t\t" + '\033[31m' + "Do Not Disturb" + '\033[0m')
+        		switchRed()
 		elif jsonresult['activity'] == "Offline":
 			print("Teams presence:\t\t" + "Offline")
 			switchPink()
 		elif jsonresult['activity'] == "Inactive":
-                        print("Teams presence:\t\t" + '\033[33m' + "Inactive" + '\033[0m')
-                        switchYellow()
+            		print("Teams presence:\t\t" + '\033[33m' + "Inactive" + '\033[0m')
+            		switchYellow()
 		elif jsonresult['activity'] == "InAMeeting":
-                        print("Teams presence:\t\t" + '\033[31m' + "In a meeting" + '\033[0m')
-                        switchRed()
+            		print("Teams presence:\t\t" + '\033[31m' + "In a meeting" + '\033[0m')
+            		switchBlue()
 		elif jsonresult['activity'] == "OffWork":
-                        print("Teams presence:\t\t" + '\033[35m' + "Off work" + '\033[0m')
-                        switchPink()
+            		print("Teams presence:\t\t" + '\033[35m' + "Off work" + '\033[0m')
+            		switchPink()
 		elif jsonresult['activity'] == "OutOfOffice":
-                        print("Teams presence:\t\t" + '\033[35m' + "Out of office" + '\033[0m')
-                        switchPink()
+            		print("Teams presence:\t\t" + '\033[35m' + "Out of office" + '\033[0m')
+            		switchPink()
 		elif jsonresult['activity'] == "Presenting":
-                        print("Teams presence:\t\t" + '\033[31m' + "Presenting" + '\033[0m')
-                        switchRed()
+            		print("Teams presence:\t\t" + '\033[31m' + "Presenting" + '\033[0m')
+            		switchPurple()
 		elif jsonresult['activity'] == "UrgentInterruptionsOnly":
-                        print("Teams presence:\t\t" + '\033[31m' + "Urgent interruptions only" + '\033[0m')
-                        switchRed()
+            		print("Teams presence:\t\t" + '\033[31m' + "Urgent interruptions only" + '\033[0m')
+            		switchRed()
 		else:
 			print("Teams presence:\t\t" + "Unknown")
 			switchBlue()
 		print()
 		countdown(int(sleepValue))
-
